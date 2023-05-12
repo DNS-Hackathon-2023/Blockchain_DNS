@@ -1,0 +1,180 @@
+#!/usr/bin/env python3
+
+#############################################################################################
+#   bcdig - blockchain "dig" command.  Answers are cached in /tmp/bcdig for fast retrieval
+#############################################################################################
+
+import argparse
+import json
+import zlib
+from time import time, ctime
+from struct import unpack
+import os
+from dotenv import load_dotenv
+from web3 import Web3
+from dns import rdataclass, rdatatype
+
+#############################################################################################
+#   BCdig class:    data and methods to do a DNS dig to the blockchain
+#############################################################################################
+
+class BCdig:
+
+    def __init__(self):
+        self.w3 = None
+        self.contract = None
+        self.FQDN = ""
+        self.rrType = ""
+        self.startTime = 0
+        self.status = "NOERROR"
+        self.numAnswers = 0
+        self.answers = ""
+        self.msgSize = 0
+        self.depth = 0
+
+
+
+    #########################################################################################
+    #   Method to parse the command line arguments   e.g.  bcdig invykta.com CNAME
+    #           default rrType is "A"
+    #########################################################################################
+
+    def CLI_Parse(self):
+        usage = """bcdig domain [rrType] -- lookup a domain's rrType record (default 'A') from the DNS blockchain"
+    """
+        p = argparse.ArgumentParser(usage=usage)
+        p.add_argument( "FQDN", help="the domain name to lookup" )
+
+        p.add_argument( "rrType", nargs="?", default="A",
+                        help="the resource record type (A, CNAME, etc.)" )
+
+        params = p.parse_args()
+        self.FQDN = params.FQDN if params.FQDN[-1] == "." else params.FQDN + "."
+        self.rrType = params.rrType
+
+
+    #########################################################################################
+    #   Method to connect to blockchain and DDNS smart contract
+    #           Note: these constants will change if using a new smart contract or blockchain
+    #########################################################################################
+
+    def initBC(self):
+        load_dotenv()
+        try:
+            self.w3 = Web3(Web3.HTTPProvider(os.getenv('BC_PROVIDER')))
+            if not self.w3.isConnected(): raise Exception
+            ADDRESS = os.getenv('CONTRACT_ADDRESS')
+            # use a subset of the ABI instead of reading the whole ABI contents from a file
+            abi = json.loads(os.getenv('ABI'))
+            self.contract =  self.w3.eth.contract(address=ADDRESS, abi=abi["abi"])
+        except Exception as err:
+            print("**** Error: unable to connect to blockchain; program terminated\n")
+            print (err)
+            exit(1)
+
+
+    ###################################################################
+    # convertToCanonical:  converts multiformat encoded RRset to array of DNS canonical strings
+    ###################################################################
+
+    def convertToCanonical(self, domain, rrType, mf):
+        data = mf
+        fmt = "@c" + str(len(mf) - 1) + "s"
+        encoder, data = unpack(fmt, mf)
+        canonical = []
+
+        if encoder == b'\x00': return canonical  # delegation
+
+        if encoder in [b'\x02', b'\x04']:
+            # zip encoded.  Decompress it.
+            data = zlib.decompress(data)
+
+        # build the canonical form for the requested rrType
+        data = data.decode('ascii')
+        if encoder in [b'\x01', b'\x02']:
+            # tinyJSON
+            data = json.loads(data)
+            key = str(int(rdatatype.from_text(rrType)))
+            if key in data:
+                d = data[key]
+                for rdata in d[2]:
+                    canonical.append("\t".join( (domain, str(d[0]), str(rdataclass.to_text(d[1])), rrType, rdata) ) )
+        else:
+            # already in canonical RRset form
+            if data.split("\t")[2] == rrType:
+                for rdata in data.split("\n")[0:-1]:    # split will put a blank last entry, so don't use it
+                    canonical.append( domain + "\t" + rdata )
+        return canonical
+
+
+    #############################################################################################
+    #   resolver: do a  lookup from first the cache and then the blockchain
+    #       can be called recursively because of a CNAME chase
+    #############################################################################################
+
+    def resolver(self, domain, rrType):
+        if self.contract == None:
+            self.initBC()  # connect to the blockchain only if cache miss and not connected already
+        try:
+            mfData = self.contract.functions.getRRset(domain).call()
+        except Exception as err:
+            if self.depth == 0: self.status = "NXDOMAIN"
+            #print (err)
+            return
+        self.msgSize += len(mfData)
+        canonical =  self.convertToCanonical(domain, rrType, mfData)
+        numAnswers = len(canonical)
+        if numAnswers:
+            self.numAnswers += numAnswers
+            self.answers += "\n".join(canonical) +"\n"
+            return
+
+        # no answer, check for CNAME
+        canonical = self.convertToCanonical(domain, "CNAME", mfData)
+        if len(canonical):
+        # CNAME exists
+            self.depth += 1
+            if self.depth > 4: return  # limit recursion
+            self.numAnswers += 1
+            self.answers += "\n".join(canonical) + "\n"
+            self.resolver(canonical[0].split("\t")[4], rrType)
+
+#############################################################################################
+#   main:   parse arguments from the command line and call routines to
+#           lookup a DNS record  Most work is done by methods in the BCdig class.
+#############################################################################################
+
+def main():
+    print()                 #   print a blank line after the command to make things easier to view
+    bcdig = BCdig()         # create an instance of BCdig class
+    bcdig.CLI_Parse()       # parse command line arguments
+
+
+    bcdig.startTime = time()  # this for calculating elapsed time assuming we were already connected to blockchain
+
+    # query the cache and blockchain
+    bcdig.resolver(bcdig.FQDN, bcdig.rrType)
+    #print ( self.numAnswers, msgSize, status, answers )
+
+    # print out the reply
+    print()
+    print("; <<>> bcdig 1.0.0 <<>> {0} {1}".format(bcdig.FQDN, bcdig.rrType))
+    print(";; Got answer:")
+    print(";; ->>HEADER<<- opcode: QUERY, status: {0}, id: 0".format(bcdig.status))
+    print(";; flags: qr rd ad; QUERY: 1, ANSWER: {0}, AUTHORITY: 0, ADDITIONAL: 0".format(bcdig.numAnswers))
+    print()
+    print(";; QUESTION SECTION:")
+    print("{0}\t\tIN\t{1}\n".format(bcdig.FQDN, bcdig.rrType))
+    if bcdig.numAnswers > 0:
+        print(";; ANSWER SECTION:")
+        print(bcdig.answers)
+    print()
+    print(";; Query time: {0} msec".format(int((time() - bcdig.startTime) * 1000)))
+    print(";; Server: DNS Blockchain")
+    print(";; When: {0}".format(ctime(time())))
+    print(";; Msg size: {0}".format(bcdig.msgSize))
+    print()
+    exit(0)
+
+if __name__ == '__main__':
+    main()

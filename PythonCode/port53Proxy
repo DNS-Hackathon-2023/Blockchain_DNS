@@ -1,0 +1,160 @@
+#!/usr/bin/env python3
+
+#############################################################################################
+#   port53Proxy - respond to real DNS requests on port 53 with data from the DNS Blockchain
+#############################################################################################
+
+import os
+import json
+from web3 import Web3
+import socket
+import dns.query
+import dns.message
+from dns import rdatatype, rdataclass
+import zlib
+from dotenv import load_dotenv
+from struct import unpack
+
+
+#############################################################################################
+#   port53Proxy class:    data and methods for the proxy
+#############################################################################################
+
+class Port53Proxy:
+
+    def __init__(self):
+        self.w3 = None
+        self.contract = None
+        self.FQDN = ""
+        self.UDP_IP_ADDRESS = "0.0.0.0"
+        self.UDP_PORT_NO = 53
+
+    #########################################################################################
+    #   Method to connect to blockchain and DDNS smart contract
+    #           Note: these constants will change if using a new smart contract or blockchain
+    #########################################################################################
+
+    def initBC(self):
+        load_dotenv()
+        try:
+            self.w3 = Web3(Web3.HTTPProvider(os.getenv('BC_PROVIDER')))  # 'http://127.0.0.1:8545'))
+            if not self.w3.isConnected(): raise Exception
+            ADDRESS = os.getenv('CONTRACT_ADDRESS')
+            # use a subset of the ABI instead of reading the whole ABI contents from a file
+            abi = json.loads(os.getenv('ABI'))
+            self.contract = self.w3.eth.contract(address=ADDRESS, abi=abi["abi"])
+        except Exception as err:
+            print("**** Error: unable to connect to blockchain; program terminated\n")
+            print(err)
+            exit(1)
+
+    ###################################################################
+    # convertToCanonical:  converts multiformat encoded RRset to array of DNS canonical strings
+    ###################################################################
+
+    def convertToCanonical(self, domain, rrType, mf):
+        data = mf
+        fmt = "@c" + str(len(mf) - 1) + "s"
+        encoder, data = unpack(fmt, mf)
+        canonical = []
+
+        if encoder == b'\x00': return canonical  # delegation
+
+        if encoder in [b'\x02', b'\x04']:
+            # zip encoded.  Decompress it.
+            data = zlib.decompress(data)
+
+        # build the canonical form for the requested rrType
+
+        data = data.decode('ascii')
+        if encoder in [b'\x01', b'\x02']:
+            # tinyJSON
+            data = json.loads(data)
+            key = str(int(rdatatype.from_text(rrType)))
+            if key in data:
+                d = data[key]
+                for rdata in d[2]:
+                    canonical.append("\t".join((domain, str(d[0]), str(rdataclass.to_text(d[1])), rrType, rdata)))
+        else:
+            # already in canonical RRset form
+            if data.split("\t")[2] == rrType:
+                for rdata in data.split("\n")[0:-1]:  # split will put a blank last entry, so don't use it
+                    canonical.append(domain + "\t" + rdata)
+        return canonical
+
+    ###################################################################
+    # proxy
+    ###################################################################
+
+    def proxy(self):
+        # declare our serverSocket upon to listen for UDP messages
+        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        sock.bind((self.UDP_IP_ADDRESS, self.UDP_PORT_NO))
+
+        # set up web3 and connect to blockchain
+
+        while True:
+            # wait for a query
+            try:
+                msg, qTime, qAddr = dns.query.receive_udp(sock, destination=None, expiration=None,
+                                                          ignore_unexpected=False,
+                                                          one_rr_per_rrset=False, keyring=None, request_mac=b'',
+                                                          ignore_trailing=False, raise_on_truncation=False)
+                # print("packet")
+                # print(msg)
+                # print(qTime)
+                # print(qAddr)
+                question = str(msg.question[0]).split()
+                domainName = question[0]
+                rdType = question[2]
+
+                # build a skeleton response
+                response = dns.message.make_response(msg)
+                # look up domain in the blockchain
+                try:
+                    rrsetMF = self.contract.functions.getRRset(domainName).call()
+                    rrset = self.convertToCanonical(domainName, rdType, rrsetMF)
+                except:
+                    # print("NXDOMAIN")
+                    response.set_rcode(dns.rcode.NXDOMAIN)
+                    dns.query.send_udp(sock, response, qAddr)
+                    continue
+
+                if len(rrset) == 0:
+                    print("no records")
+                    dns.query.send_udp(sock, response, qAddr)
+                    continue
+
+                info = rrset[0].split("\t")
+                ttl = info[1]
+                klass = info[2]
+                rdata = []
+                for i in range(len(rrset)):
+                    rdata.append(rrset[i].split("\t")[4])
+                rrset = dns.rrset.from_text_list(dns.name.from_text(domainName),
+                                                 ttl,
+                                                 dns.rdataclass.from_text(klass),
+                                                 dns.rdatatype.from_text(rdType),
+                                                 rdata)
+                # print ("rrset", rrset)
+                response.answer.append(rrset)
+                dns.query.send_udp(sock, response, qAddr)
+            except:
+
+                # other errors such as malformed input packet
+                response.set_rcode(dns.rcode.SERVFAIL)
+                dns.query.send_udp(sock, response, qAddr)
+
+
+#############################################################################################
+#   main:
+#############################################################################################
+
+def main():
+    port53Proxy = Port53Proxy()  # create an instance of Port53Proxy class
+    port53Proxy.initBC()  # connect to the blockchain
+    port53Proxy.proxy()  # listen and respond
+
+
+if __name__ == '__main__':
+    main()
