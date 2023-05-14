@@ -1,7 +1,7 @@
 # Blockchain_DNS
 
 ## Description
-A DNS Authority Namserver, BCDNS,  has been written as a smart contract on the ethereum blockchain.  This implementation provides
+A DNS Authority Namserver, BCDNS,  has been written as a smart contract on the ethereum blockchain.  This DNS Nameserver provides:
 * decentralization: high availability, DDoS and censorship resistant
 * data security: all records are digitally signed, but much simpler to use than DNSSEC
 * data privacy: all lookups and data retrieval are HTTPS encrypted
@@ -28,4 +28,4 @@ Several bridges from BCDNS to conventional DNS have already been written and are
   1. Modify Mozilla TRR (trusted resolver) to directly access the blockchain
   2. Mobile adaptor for blockchain 
 
-![Hackathon Ideas](Hackathon_ideas.pdf "Hackathon Ideas")
+![Hackathon Ideas](/Hackathon_ideas.png)
