@@ -28,4 +28,10 @@ Several bridges from BCDNS to conventional DNS have already been written and are
   1. Modify Mozilla TRR (trusted resolver) to directly access the blockchain
   2. Mobile adaptor for blockchain 
 
-<img src="/Hackathon_Ideas.png" alt="Hackathon Ideas" width="1200" />
+<img src="/images/Hackathon_Ideas.png" alt="Hackathon Ideas" width="1200" />
+
+## BCDNS EcoSystem
+
+<img src="/images/POC Architecture.png" alt="ecosystem" width="1200" />
+
+
