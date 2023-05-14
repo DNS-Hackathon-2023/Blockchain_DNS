@@ -1,0 +1,47 @@
+$ORIGIN colostate.edu.
+$TTL 3600
+
+colostate.edu.		3600	IN	SOA	hasty.colostate.edu. dnsadmin.colostate.edu. 21377098 900 600 86400 3600
+
+colostate.edu.		3600	IN	NS	dns1.colostate.edu.
+colostate.edu.		3600	IN	NS	dns3.colostate.edu.
+colostate.edu.		3600	IN	NS	dns2.colostate.edu.
+
+colostate.edu.		600	IN	A	129.82.103.93
+colostate.edu.		600	IN	A	129.82.103.16
+colostate.edu.		600	IN	A	129.82.103.91
+colostate.edu.		600	IN	A	129.82.103.78
+colostate.edu.		600	IN	A	129.82.103.64
+colostate.edu.		600	IN	A	129.82.103.79
+
+colostate.edu.		3600	IN	MX	0 colostate-edu.mail.protection.outlook.com.
+
+colostate.edu.		3600	IN	TXT	"MS=ms62117612"
+colostate.edu.		3600	IN	TXT	"v=spf1 include:spf-spamcanners.colostate.edu include:spf.protection.outlook.com ip4:129.82.103.186 ip4:129.82.103.187 ~all"
+colostate.edu.		3600	IN	TXT	"apple-domain-verification=Y6oBOTLKzYUaytew"
+colostate.edu.		3600	IN	TXT	"adobe-idp-site-verification=8de254c105ee1eb2eb07e4221bd7af78734ebe7d685bad79fd98cf5e5c904c3c"
+colostate.edu.		3600	IN	TXT	"Y24NZ2FD1R3ZR8ESYQNP4L4AC1N4SSZFYNTNY6IZH"
+colostate.edu.		3600	IN	TXT	"canva-site-verification=if15t_PKX86x5ToKjo8Yuw"
+colostate.edu.		3600	IN	TXT	"/6X84hdUjbuHwmtBmf/DK0uPBLo9ZPKiwVFLBkvxwRL3mzFlUprjiuX7c4czI84rk6R8FEjIVyiPIMp62VkL0w=="
+colostate.edu.		3600	IN	TXT	"atlassian-domain-verification=/ToU5/mhDI/YiZtMsmBq5w39aLNr1NyBub6LrqHwP/uRthz5UbQeJa/iW1tTzj/o"
+
+dns1.colostate.edu.	3278	IN	A	129.82.103.121
+dns3.colostate.edu.	3479	IN	A	129.82.103.111
+dns2.colostate.edu.	3479	IN	A	13.88.23.86
+
+mail.colostate.edu.	60	IN	A	129.82.103.152
+mail.colostate.edu.	60	IN	A	129.82.103.151
+
+www.colostate.edu.	3600	IN	CNAME	webprod2.ucm.colostate.edu.
+webprod2.ucm.colostate.edu. 3600 IN	A	129.82.210.68
+
+compsci.colostate.edu.	3600	IN	CNAME	sirius.natsci.colostate.edu.
+
+sirius.natsci.colostate.edu. 3600 IN	A	129.82.210.222
+betelgeuse.natsci.colostate.edu. 3600 IN A 128.82.210.223
+
+cs.colostate.edu.	        3600	IN	NS	dns1.colostate.edu.
+physics.colostate.edu.	    3600	IN	NS	dns1.colostate.edu.
+math.colostate.edu.	        3600	IN	NS	dns3.colostate.edu.
+biz.colostate.edu.	        3600	IN	NS	dns1.colostate.edu.
+psych.colostate.edu.	    3600	IN	NS	dns1.colostate.edu.

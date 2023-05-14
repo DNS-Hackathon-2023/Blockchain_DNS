@@ -1,0 +1,40 @@
+$ORIGIN .
+
+.			86400	IN	SOA	a.root-servers.net. nstld.verisign-grs.com. 2022061600 1800 900 604800 86400
+.			86400	IN	RRSIG	SOA 8 0 86400 20220629050000 20220616040000 47671 . W4H7kTbFWzXewQ4XQQOBRIL1cALUgd6w/+B383NOXIp4FAsybnd/tvpzEkOMhOgGbzWVuuFQbWpDIcgLvlPOiXGdW18iyxDrfUSUUU2S2817ZWAjxUYmWzI15DtQkyMPTK9sWLnb+NJf7di+FYz3IeT4N5jVLX68qNrLwjbN+/6lxFF3/yBDEKK4tdECaULW3N+93txKThEOm728AhLWET70trlLONFs1i2D3VmgAnwGTMwTxNcfMZDua6ZjayHNQjco38MdtZb1aKB+z2G0ikxlpdvE3H9DIIrFaSA9oCkeW3wxtOkcMVOQgs2NiygSVbYKM3JduCE+872FMgAExA==
+.			518400	IN	NS	a.root-servers.net.
+.			518400	IN	NS	b.root-servers.net.
+.			518400	IN	NS	c.root-servers.net.
+.			518400	IN	NS	d.root-servers.net.
+.			518400	IN	NS	e.root-servers.net.
+.			518400	IN	NS	f.root-servers.net.
+.			518400	IN	NS	g.root-servers.net.
+.			518400	IN	NS	h.root-servers.net.
+.			518400	IN	NS	i.root-servers.net.
+.			518400	IN	NS	j.root-servers.net.
+.			518400	IN	NS	k.root-servers.net.
+.			518400	IN	NS	l.root-servers.net.
+.			518400	IN	NS	m.root-servers.net.
+
+; TLDs
+;AAA			172800 IN NS nowhere.com
+;AARP		172800 IN NS nowhere.com
+COM			172800 IN NS nowhere.com
+;           172800 IN NS        0x384ff5371E473A1579DF484CfC18AB7cBe0EAf60,hithere.com  ; Ganache
+;            172800 IN NS        0x342F0fA8770805a7F336e1C48D57E711b89bF6f0     ; Goerli
+EDU			172800 IN NS nowhere.com
+;           172800 IN NS        0x403D65aED17706cF3EcB1077c62e466541e64403  ; Ganache
+;            172800 IN NS        0x22BF602aAC682d71D9F1fBe281ddb9428C160D8D   ; Goerli
+EU			172800 IN NS nowhere.com
+ORG			172800 IN NS nowhere.com
+;            172800 IN NS        0x60E1B4a60F30414df5bb53F61D380e8B1834Cb74  ; Ganache
+;           172800 IN NS        0x60E1B4a60F30414df5bb53F61D380e8B1834Cb74   ; Goerli
+INFO		172800 IN NS nowhere.com
+ARPA		172800 IN NS nowhere.com
+NL   		172800 IN NS nowhere.com
+FR   		172800 IN NS nowhere.com
+
+;XXX 		172800 IN NS nowhere.com
+UK   		172800 IN NS nowhere.com
+;ZW			172800 IN NS nowhere.com
+

@@ -1,0 +1,41 @@
+$ORIGIN edu.
+$TTL 3600
+
+edu.		900	IN	SOA	a.edu-servers.net. nstld.verisign-grs.com. 1655592125 1800 900 604800 86400
+
+edu.			55641	IN	NS	j.edu-servers.net.
+edu.			55641	IN	NS	a.edu-servers.net.
+edu.			55641	IN	NS	d.edu-servers.net.
+edu.			55641	IN	NS	h.edu-servers.net.
+edu.			55641	IN	NS	e.edu-servers.net.
+edu.			55641	IN	NS	c.edu-servers.net.
+edu.			55641	IN	NS	m.edu-servers.net.
+edu.			55641	IN	NS	k.edu-servers.net.
+edu.			55641	IN	NS	i.edu-servers.net.
+edu.			55641	IN	NS	l.edu-servers.net.
+edu.			55641	IN	NS	g.edu-servers.net.
+edu.			55641	IN	NS	f.edu-servers.net.
+edu.			55641	IN	NS	b.edu-servers.net.
+
+colostate.edu.		3600	IN	NS	dns2.colostate.edu.
+colostate.edu.		3600	IN	NS	dns3.colostate.edu.
+colostate.edu.		3600	IN	NS	dns1.colostate.edu.
+colostate.edu.      3600    IN  NS  0x99aD790a207519ce06eE7172C1a9B76eB80De82F  ; Goerli
+
+mit.edu.		1800	IN	NS	ns1-37.akam.net.
+mit.edu.		1800	IN	NS	use2.akam.net.
+mit.edu.		1800	IN	NS	asia1.akam.net.
+mit.edu.		1800	IN	NS	use5.akam.net.
+mit.edu.		1800	IN	NS	usw2.akam.net.
+mit.edu.		1800	IN	NS	eur5.akam.net.
+mit.edu.		1800	IN	NS	asia2.akam.net.
+mit.edu.		1800	IN	NS	ns1-173.akam.net.
+
+umich.edu.		1800	IN	NS	dns1.itd.umich.edu.
+umich.edu.		1800	IN	NS	dns.cs.wisc.edu.
+umich.edu.		1800	IN	NS	dns3.umich.org.
+umich.edu.		1800	IN	NS	dns2.itd.umich.edu.
+
+cu.edu.			21600	IN	NS	ns13.cu.edu.
+ucla.edu.		3600	IN	NS	ns1.dns.ucla.edu.
+berkeley.edu.		10800	IN	NS	adns1.berkeley.edu.
