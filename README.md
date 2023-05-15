@@ -30,8 +30,12 @@ Several bridges from BCDNS to conventional DNS have already been written and are
 
 <img src="/images/Hackathon_Ideas.png" alt="Hackathon Ideas" width="1200" />
 
-## BCDNS EcoSystem
+## BCDNS EcoSystem & Architecture Info
 
 <img src="/images/POC Architecture.png" alt="ecosystem" width="1200" />
+
+<img src="/images/NFT Hierarchy.png" alt="NFT Hierarchy" width="1200" />
+
+<img src="/images/NFT Contents.png" alt="NFT Contents" width="1200" />
 
 
